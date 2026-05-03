@@ -1,0 +1,18 @@
+# Real extraction outputs (large; re-generated locally)
+data_raw/
+output/
+*.dbc
+*.dbf
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+.env
+
+# IDE
+.vscode/
+.idea/
+.DS_Store
