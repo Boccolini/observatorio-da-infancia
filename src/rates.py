@@ -25,6 +25,16 @@ import pandas as pd
 
 KEY = ["ano", "uf_code", "uf_sigla", "regiao"]
 
+COUNT_COLS = [
+    "int_menor_1", "int_1a4", "int_menor_5",
+    "obt_menor_1", "obt_1a4", "obt_menor_5",
+    "nv", "pop_menor_1", "pop_1a4", "pop_menor_5",
+]
+
+
+def _safe_rate(num: pd.Series, den: pd.Series, mult: float) -> pd.Series:
+    return (num / den * mult).where(den > 0, other=pd.NA)
+
 
 def _wide(df: pd.DataFrame, value_col: str) -> pd.DataFrame:
     """Pivot long faixa table -> wide with one column per faixa."""
@@ -62,14 +72,17 @@ def build_indicator_table(
     df = sih_w.merge(sim_w, on=KEY, how="outer")
     df = df.merge(pop_w, on=["ano", "uf_code"], how="left")
     df = df.merge(sinasc.rename(columns={"nascidos_vivos": "nv"}), on=KEY, how="left")
-    df = df.fillna(0)
+
+    pre_total_counts = [
+        "int_menor_1", "int_1a4",
+        "obt_menor_1", "obt_1a4",
+        "nv", "pop_menor_1", "pop_1a4",
+    ]
+    df[pre_total_counts] = df[pre_total_counts].fillna(0)
 
     df["int_menor_5"] = df["int_menor_1"] + df["int_1a4"]
     df["obt_menor_5"] = df["obt_menor_1"] + df["obt_1a4"]
     df["pop_menor_5"] = df["pop_menor_1"] + df["pop_1a4"]
-
-    def _safe_rate(num, den, mult):
-        return (num / den * mult).where(den > 0, other=pd.NA)
 
     df["taxa_int_menor_1_por_1000NV"] = _safe_rate(df["int_menor_1"], df["nv"], 1000)
     df["taxa_obt_menor_1_por_1000NV"] = _safe_rate(df["obt_menor_1"], df["nv"], 1000)
@@ -78,10 +91,7 @@ def build_indicator_table(
     df["taxa_int_menor_5_por_100k"] = _safe_rate(df["int_menor_5"], df["pop_menor_5"], 100_000)
     df["taxa_obt_menor_5_por_100k"] = _safe_rate(df["obt_menor_5"], df["pop_menor_5"], 100_000)
 
-    cols = KEY + [
-        "int_menor_1", "int_1a4", "int_menor_5",
-        "obt_menor_1", "obt_1a4", "obt_menor_5",
-        "nv", "pop_menor_1", "pop_1a4", "pop_menor_5",
+    cols = KEY + COUNT_COLS + [
         "taxa_int_menor_1_por_1000NV",
         "taxa_obt_menor_1_por_1000NV",
         "taxa_int_1a4_por_100k",
@@ -94,19 +104,15 @@ def build_indicator_table(
 
 def aggregate_to_region(df_uf: pd.DataFrame) -> pd.DataFrame:
     """Aggregate the UF-level indicator table to the 5 regions + Brasil totals."""
-    counts = ["int_menor_1", "int_1a4", "int_menor_5",
-              "obt_menor_1", "obt_1a4", "obt_menor_5",
-              "nv", "pop_menor_1", "pop_1a4", "pop_menor_5"]
-
-    by_region = df_uf.groupby(["ano", "regiao"])[counts].sum().reset_index()
-    by_brasil = df_uf.groupby(["ano"])[counts].sum().reset_index()
+    by_region = df_uf.groupby(["ano", "regiao"])[COUNT_COLS].sum().reset_index()
+    by_brasil = df_uf.groupby(["ano"])[COUNT_COLS].sum().reset_index()
     by_brasil["regiao"] = "Brasil"
 
     out = pd.concat([by_region, by_brasil], ignore_index=True)
-    out["taxa_int_menor_1_por_1000NV"] = (out["int_menor_1"] / out["nv"]).where(out["nv"] > 0) * 1000
-    out["taxa_obt_menor_1_por_1000NV"] = (out["obt_menor_1"] / out["nv"]).where(out["nv"] > 0) * 1000
-    out["taxa_int_1a4_por_100k"] = (out["int_1a4"] / out["pop_1a4"]).where(out["pop_1a4"] > 0) * 100_000
-    out["taxa_obt_1a4_por_100k"] = (out["obt_1a4"] / out["pop_1a4"]).where(out["pop_1a4"] > 0) * 100_000
-    out["taxa_int_menor_5_por_100k"] = (out["int_menor_5"] / out["pop_menor_5"]).where(out["pop_menor_5"] > 0) * 100_000
-    out["taxa_obt_menor_5_por_100k"] = (out["obt_menor_5"] / out["pop_menor_5"]).where(out["pop_menor_5"] > 0) * 100_000
+    out["taxa_int_menor_1_por_1000NV"] = _safe_rate(out["int_menor_1"], out["nv"], 1000)
+    out["taxa_obt_menor_1_por_1000NV"] = _safe_rate(out["obt_menor_1"], out["nv"], 1000)
+    out["taxa_int_1a4_por_100k"] = _safe_rate(out["int_1a4"], out["pop_1a4"], 100_000)
+    out["taxa_obt_1a4_por_100k"] = _safe_rate(out["obt_1a4"], out["pop_1a4"], 100_000)
+    out["taxa_int_menor_5_por_100k"] = _safe_rate(out["int_menor_5"], out["pop_menor_5"], 100_000)
+    out["taxa_obt_menor_5_por_100k"] = _safe_rate(out["obt_menor_5"], out["pop_menor_5"], 100_000)
     return out.sort_values(["regiao", "ano"]).reset_index(drop=True)
