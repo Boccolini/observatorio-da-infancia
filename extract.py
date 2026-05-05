@@ -107,6 +107,26 @@ def main() -> int:
             "U5MR aqui é aproximação crude (óbitos<5 / NV mesmo ano), "
             "não a probabilidade sintética q(5) da UN-IGME."
         ),
+        "Janela temporal": (
+            f"{args.start}-{args.end} (25 anos). Floor metodológico = 1996 "
+            "(adoção da CID-10 no Brasil). Janela cobre rollout do "
+            "rotavírus no PNI (mar/2006), expansão do Bolsa Família e "
+            "disrupção COVID."
+        ),
+        "Caveat - cobertura SIM": (
+            "A cobertura do SIM melhorou substancialmente no período, "
+            "principalmente nas regiões Norte e Nordeste. Quedas reais "
+            "de mortalidade nos primeiros anos podem estar parcialmente "
+            "compensadas por melhor registro. Ver fatores de correção "
+            "publicados pelo Ministério da Saúde para análise de "
+            "tendência rigorosa."
+        ),
+        "Caveat - projeções IBGE": (
+            "Denominadores populacionais usam IBGE Tabela 7358 "
+            "(Projeção da População), revisada após o Censo 2022. "
+            "Snapshots anteriores da mesma tabela podem diferir para "
+            "anos 2000-2010."
+        ),
         "Gerado em": datetime.now().isoformat(timespec="seconds"),
     }
 

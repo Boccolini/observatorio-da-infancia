@@ -9,11 +9,15 @@ from pathlib import Path
 # Sub-codes (A09.0 / A09.9) appear in SIM/SIH as A090 / A099 (4-character form).
 CID10_PREFIX = "A09"
 
-# Last 10 years window (target). For SIH we expect data through current year minus 1
-# month; for SIM/SINASC there is typically a 1.5-2 year publication lag, so the
+# Time window. 25-year span captures the pre-rotavirus-vaccine baseline
+# (PNI rollout March/2006), Bolsa Família scale-up, and post-vaccine
+# decline — the structural inflections that matter for trend analysis.
+# Floor is 1996 (Brazil's CID-10 adoption); pre-1996 needs CID-9 crosswalk.
+# For SIH we expect data through current year minus 1 month; for
+# SIM/SINASC there is typically a 1.5-2 year publication lag, so the
 # pipeline auto-detects the latest available year per source.
 END_YEAR = date.today().year - 1
-START_YEAR = END_YEAR - 9  # 10-year inclusive window
+START_YEAR = END_YEAR - 24  # 25-year inclusive window
 
 # Age groups of interest. Keys map to denominator strategies in src/rates.py
 AGE_GROUPS = {
