@@ -86,6 +86,9 @@ CHARTS = [
     ("taxa_obt_menor_5_por_100k",
      "Óbitos por gastroenterite (CID A09) - menores de 5 anos",
      "Óbitos por 100.000 hab."),
+    ("taxa_obt_menor_5_por_1000NV",
+     "Óbitos por gastroenterite (CID A09) - menores de 5 anos (framing WHO/U5MR)",
+     "Óbitos por 1.000 nascidos vivos"),
 ]
 
 

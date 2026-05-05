@@ -2,13 +2,12 @@
 
 Definitions:
   - Internações em < 1 ano: por 1.000 nascidos vivos (denom = SINASC same year).
-  - Óbitos em < 1 ano:      por 1.000 nascidos vivos.
+  - Óbitos em < 1 ano:      por 1.000 nascidos vivos (= IMR, WHO/UN-IGME).
   - Internações 1-4 anos:   por 100.000 habitantes da faixa.
   - Óbitos 1-4 anos:        por 100.000 habitantes da faixa.
-  - Total < 5 anos: numerator = soma das duas faixas;
-        denom = nascidos vivos + população 1-4 anos é incoerente, então
-        usamos população 0-4 anos (estimativa IBGE) como denominador, e
-        a taxa é por 100.000 habitantes.
+  - Total < 5 anos:
+        - per 100.000 hab. (denom = população 0-4 IBGE) -> framing GBD.
+        - per 1.000 NV    (denom = nascidos vivos)      -> framing WHO/U5MR.
 
 Rate columns produced:
   - taxa_int_menor_1_por_1000NV
@@ -17,6 +16,7 @@ Rate columns produced:
   - taxa_obt_1a4_por_100k
   - taxa_int_menor_5_por_100k
   - taxa_obt_menor_5_por_100k
+  - taxa_obt_menor_5_por_1000NV   (U5MR aproximada, comparável a WHO)
 """
 
 from __future__ import annotations
@@ -90,6 +90,7 @@ def build_indicator_table(
     df["taxa_obt_1a4_por_100k"] = _safe_rate(df["obt_1a4"], df["pop_1a4"], 100_000)
     df["taxa_int_menor_5_por_100k"] = _safe_rate(df["int_menor_5"], df["pop_menor_5"], 100_000)
     df["taxa_obt_menor_5_por_100k"] = _safe_rate(df["obt_menor_5"], df["pop_menor_5"], 100_000)
+    df["taxa_obt_menor_5_por_1000NV"] = _safe_rate(df["obt_menor_5"], df["nv"], 1000)
 
     cols = KEY + COUNT_COLS + [
         "taxa_int_menor_1_por_1000NV",
@@ -98,6 +99,7 @@ def build_indicator_table(
         "taxa_obt_1a4_por_100k",
         "taxa_int_menor_5_por_100k",
         "taxa_obt_menor_5_por_100k",
+        "taxa_obt_menor_5_por_1000NV",
     ]
     return df[cols].sort_values(["ano", "uf_sigla"]).reset_index(drop=True)
 
@@ -115,4 +117,5 @@ def aggregate_to_region(df_uf: pd.DataFrame) -> pd.DataFrame:
     out["taxa_obt_1a4_por_100k"] = _safe_rate(out["obt_1a4"], out["pop_1a4"], 100_000)
     out["taxa_int_menor_5_por_100k"] = _safe_rate(out["int_menor_5"], out["pop_menor_5"], 100_000)
     out["taxa_obt_menor_5_por_100k"] = _safe_rate(out["obt_menor_5"], out["pop_menor_5"], 100_000)
+    out["taxa_obt_menor_5_por_1000NV"] = _safe_rate(out["obt_menor_5"], out["nv"], 1000)
     return out.sort_values(["regiao", "ano"]).reset_index(drop=True)

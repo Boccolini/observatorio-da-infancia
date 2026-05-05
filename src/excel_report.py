@@ -74,7 +74,8 @@ def write_excel(
                  "taxa_int_1a4_por_100k",
                  "taxa_obt_1a4_por_100k",
                  "taxa_int_menor_5_por_100k",
-                 "taxa_obt_menor_5_por_100k"]
+                 "taxa_obt_menor_5_por_100k",
+                 "taxa_obt_menor_5_por_1000NV"]
         for rate in rates:
             wide = df_regiao.pivot_table(
                 index="ano", columns="regiao", values=rate

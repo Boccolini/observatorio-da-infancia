@@ -60,6 +60,19 @@ def test_aggregate_to_region_recomputes_rates_from_summed_counts():
     assert sudeste["taxa_int_menor_5_por_100k"] == pytest.approx(120.0)
 
 
+def test_aggregate_to_region_u5mr_per_1000_live_births():
+    df_uf = _df_uf_fixture()
+    out = aggregate_to_region(df_uf)
+
+    sudeste = out[(out["regiao"] == "Sudeste") & (out["ano"] == 2020)].iloc[0]
+    # (15+8) / (50_000+25_000) * 1000 = 23/75 = 0.3066...
+    assert sudeste["taxa_obt_menor_5_por_1000NV"] == pytest.approx(23 / 75)
+
+    brasil = out[(out["regiao"] == "Brasil") & (out["ano"] == 2020)].iloc[0]
+    # (15+8+12) / (50_000+25_000+40_000) * 1000 = 35/115
+    assert brasil["taxa_obt_menor_5_por_1000NV"] == pytest.approx(35_000 / 115_000)
+
+
 def test_aggregate_to_region_zero_denominator_yields_na():
     df_uf = _df_uf_fixture()
     df_uf.loc[:, "nv"] = 0

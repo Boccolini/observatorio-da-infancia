@@ -98,8 +98,15 @@ def main() -> int:
         "Local": "UF e Região de residência",
         "Período SIH": f"{args.start}-{args.end}",
         "Período SIM/SINASC": f"{args.start}-{sim_end}",
-        "Taxas <1 ano": "por 1.000 nascidos vivos",
-        "Taxas 1-4 e <5 anos": "por 100.000 hab. da faixa",
+        "Taxas <1 ano": "por 1.000 nascidos vivos (= IMR, comparável a WHO/UN-IGME)",
+        "Taxas 1-4 e <5 anos": "por 100.000 hab. da faixa (framing GBD, causa-específica)",
+        "Taxa <5 anos adicional": "óbitos por 1.000 NV (framing WHO/U5MR, causa-específica)",
+        "Comparabilidade internacional": (
+            "IMR (<1 ano por 1000 NV) alinhado a WHO/UN-IGME. "
+            "Causa-específica (CID A09) por 100k hab. alinhada a GBD. "
+            "U5MR aqui é aproximação crude (óbitos<5 / NV mesmo ano), "
+            "não a probabilidade sintética q(5) da UN-IGME."
+        ),
         "Gerado em": datetime.now().isoformat(timespec="seconds"),
     }
 
